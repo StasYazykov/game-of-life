@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import random
 from cell import Cell
+from datetime import datetime
 from pprint import pprint as pp
 
 
@@ -24,6 +25,8 @@ class GameOfLife:
 
         self.speed = speed
 
+        self.mouse_down = False
+
     def draw_lines(self) -> None:
         for x in range(0, self.width, self.cell_size):
             pygame.draw.line(self.screen, pygame.Color('black'),
@@ -41,9 +44,16 @@ class GameOfLife:
         running = True
         while running:
             for event in pygame.event.get():
+
                 if event.type == QUIT or event.type == KEYDOWN \
                         and event.key == K_ESCAPE:
                     running = False
+                elif event.type == pygame.MOUSEMOTION:
+                    self.check_mouse_motion_event(event)
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.check_mouse_button_event(True)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    self.check_mouse_button_event(False)
 
             self.draw_grid()
             self.draw_lines()
@@ -52,66 +62,79 @@ class GameOfLife:
             clock.tick(self.speed)
         pygame.quit()
 
+    def check_mouse_motion_event(self, event):
+        if self.mouse_down:
+            mouse_pos = event.pos
+            self._check_cell_focus(mouse_pos)
+
+    def check_mouse_button_event(self, down):
+        self.mouse_down = down
+        if self.mouse_down:
+            mouse_pos = pygame.mouse.get_pos()
+            self._check_cell_focus(mouse_pos)
+
+    def _check_cell_focus(self, mouse_pos):
+        # TODO
+        pass
+
     def create_grid(self, randomazie: bool = False) -> list:
+        start = datetime.now()
         grid = []
 
         # Create greed
         for y in range(0, self.cell_height):
-            row = []
             for x in range(0, self.cell_width):
                 if randomazie:
                     value = random.randint(0, 1)
                 else:
                     value = 0
-                row.append(Cell(value, x, y, self.cell_width, self.cell_height))
-            grid.append(row)
+                grid.append(Cell(value, x, y, self.cell_width, self.cell_height))
 
         # Find neighbours for all cells
-        for row in grid:
-            for cell in row:
-                cell.find_neighbours(grid)
-                # self.get_next_generation()
+        for cell in grid:
+            cell.find_neighbours(grid)
+            # self.get_next_generation()
 
+        # Time  18.247326
+        print(datetime.now() - start)
         return grid
 
+    #
     def draw_grid(self):
-        for row in grid:
-            for cell in row:
-                if cell.val == 1:
-                    color = Color(20, 120, 0)
-                else:
-                    color = Color(255, 255, 255)
-                x = cell.x * self.cell_size
-                y = cell.y * self.cell_size
-                pygame.draw.rect(self.screen, color,
-                                 (x, y, self.cell_size, self.cell_size))
+        for cell in grid:
+            if cell.val == 1:
+                color = Color(20, 120, 0)
+            else:
+                color = Color(255, 255, 255)
+            x = cell.x * self.cell_size
+            y = cell.y * self.cell_size
+            pygame.draw.rect(self.screen, color,
+                             (x, y, self.cell_size, self.cell_size))
 
     def get_next_generation(self):
-        for row in grid:
-            for cell in row:
-                count_live_neighbours = cell.count_live_neighbours()
-                if cell.val == 1:
-                    if count_live_neighbours < 2 or count_live_neighbours > 3:
-                        cell.next_val = 0
-                else:
-                    if count_live_neighbours == 3:
-                        cell.next_val = 1
+        for cell in grid:
+            count_live_neighbours = cell.count_live_neighbours()
+            if cell.val == 1:
+                if count_live_neighbours < 2 or count_live_neighbours > 3:
+                    cell.next_val = 0
+            else:
+                if count_live_neighbours == 3:
+                    cell.next_val = 1
 
         count_live = 0
         count_empty = 0
-        for row in grid:
-            for cell in row:
-                cell.val = cell.next_val
-
-                if cell.val == 1:
-                    count_live += 1
-                else:
-                    count_empty += 1
+        for cell in grid:
+            cell.val = cell.next_val
+            if cell.val == 1:
+                count_live += 1
+            else:
+                count_empty += 1
 
         print(f"Live: {count_live} Empty: {count_empty}")
 
 
 if __name__ == '__main__':
+    # 65
     seed_id = random.randint(1, 100)
     print(f"Seed: {seed_id}")
     random.seed(seed_id)
