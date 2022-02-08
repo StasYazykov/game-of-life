@@ -28,6 +28,7 @@ class GameOfLife:
         self.speed = speed
 
         self.mouse_down = False
+        self.pause = False
 
     def draw_lines(self) -> None:
         for x in range(0, self.width, self.cell_size):
@@ -44,10 +45,16 @@ class GameOfLife:
         pygame.display.set_caption('Game of Life')
         self.screen.fill(pygame.Color('white'))
         running = True
+
         while running:
             for event in pygame.event.get():
-                if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
+                if event.type == QUIT:
                     running = False
+                elif event.type == KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        running = False
+                    elif event.key == K_SPACE:
+                        self.pause = not self.pause
                 elif event.type == pygame.MOUSEMOTION:
                     self.check_mouse_motion_event(event)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -55,9 +62,10 @@ class GameOfLife:
                 elif event.type == pygame.MOUSEBUTTONUP:
                     self.check_mouse_button_event(False)
 
-            self.draw_grid()
-            self.draw_lines()
-            self.get_next_generation()
+            if not self.pause:
+                self.draw_grid()
+                self.draw_lines()
+                self.get_next_generation()
 
             pygame.display.flip()
             clock.tick(self.speed)
