@@ -1,3 +1,5 @@
+from enum import Enum
+
 import pygame
 from pygame.locals import *
 import random
@@ -6,6 +8,12 @@ from cell import Cell
 from pprint import pprint as pp
 
 from utils import _time
+
+
+class MouseBtnState(Enum):
+    LEFT_BTN = 1
+    RIGHT_BTN = 3
+    NOTHING = 0
 
 
 class GameOfLife:
@@ -27,7 +35,7 @@ class GameOfLife:
 
         self.speed = speed
 
-        self.mouse_down = False
+        self.mouse_state = MouseBtnState.NOTHING
         self.pause = False
 
     def draw_lines(self) -> None:
@@ -58,13 +66,13 @@ class GameOfLife:
                 elif event.type == pygame.MOUSEMOTION:
                     self.check_mouse_motion_event(event)
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.check_mouse_button_event(True)
+                    self.check_mouse_button_event(event.button)
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    self.check_mouse_button_event(False)
+                    self.check_mouse_button_event(MouseBtnState.NOTHING)
 
+            self.draw_grid()
+            self.draw_lines()
             if not self.pause:
-                self.draw_grid()
-                self.draw_lines()
                 self.get_next_generation()
 
             pygame.display.flip()
@@ -72,19 +80,24 @@ class GameOfLife:
         pygame.quit()
 
     def check_mouse_motion_event(self, event):
-        if self.mouse_down:
+        if self.mouse_state != MouseBtnState.NOTHING:
             mouse_pos = event.pos
             self._check_cell_focus(mouse_pos)
 
-    def check_mouse_button_event(self, down):
-        self.mouse_down = down
-        if self.mouse_down:
+    def check_mouse_button_event(self, state):
+        self.mouse_state = state
+        if self.mouse_state != MouseBtnState.NOTHING:
             mouse_pos = pygame.mouse.get_pos()
             self._check_cell_focus(mouse_pos)
 
     def _check_cell_focus(self, mouse_pos):
-        # TODO
-        pass
+        x = mouse_pos[0] // self.cell_size
+        y = mouse_pos[1] // self.cell_size
+        cell: Cell = grid[y][x]
+        if self.mouse_state == MouseBtnState.LEFT_BTN.value:
+            cell.val = 1
+        elif self.mouse_state == MouseBtnState.RIGHT_BTN.value:
+            cell.val = 0
 
     # Time  18.247326
     @_time
@@ -151,6 +164,6 @@ if __name__ == '__main__':
     print(f"Seed: {seed_id}")
     random.seed(seed_id)
     game = GameOfLife(1280, 740, 20, 10)
-    grid = game.create_grid(randomazie=True)
+    grid = game.create_grid(randomazie=False)
     # pp(grid)
     game.run()
