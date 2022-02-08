@@ -26,7 +26,7 @@ class Cell:
 
         return x, y
 
-    def find_neighbours(self, grid: list) -> list:
+    def find_neighbours(self, grid: list):
         x, y = self.x, self.y
         neighbours_coord = [
             self.calculate_neighbours_pos(x - 1, y - 1),  # 1
@@ -49,13 +49,6 @@ class Cell:
                 count += 1
         return count
 
-    def get_dead_neighbours(self) -> list:
-        dead_neighbours = []
-        for cell in self.neighbours:
-            if cell.val == 0:
-                dead_neighbours.append(cell)
-        return dead_neighbours
-
     def __str__(self) -> str:
         return f"{self.val}=({self.x},{self.y})"
 
@@ -65,8 +58,8 @@ class Cell:
 
 if __name__ == '__main__':
     # Use __str__
-    print(Cell(0, 1, 2))
+    print(Cell(0, 1, 2, 100, 100))
 
     # Use __repr__
-    data = [Cell(0, 1, 2)]
+    data = [Cell(0, 1, 2, 100, 100)]
     pprint(data)

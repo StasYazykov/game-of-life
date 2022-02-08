@@ -2,8 +2,10 @@ import pygame
 from pygame.locals import *
 import random
 from cell import Cell
-from datetime import datetime
+
 from pprint import pprint as pp
+
+from utils import _time
 
 
 class GameOfLife:
@@ -44,9 +46,7 @@ class GameOfLife:
         running = True
         while running:
             for event in pygame.event.get():
-
-                if event.type == QUIT or event.type == KEYDOWN \
-                        and event.key == K_ESCAPE:
+                if event.type == QUIT or event.type == KEYDOWN and event.key == K_ESCAPE:
                     running = False
                 elif event.type == pygame.MOUSEMOTION:
                     self.check_mouse_motion_event(event)
@@ -58,6 +58,7 @@ class GameOfLife:
             self.draw_grid()
             self.draw_lines()
             self.get_next_generation()
+
             pygame.display.flip()
             clock.tick(self.speed)
         pygame.quit()
@@ -77,8 +78,9 @@ class GameOfLife:
         # TODO
         pass
 
+    # Time  18.247326
+    @_time
     def create_grid(self, randomazie: bool = False) -> list:
-        start = datetime.now()
         grid = []
 
         # Create greed
@@ -93,13 +95,9 @@ class GameOfLife:
         # Find neighbours for all cells
         for cell in grid:
             cell.find_neighbours(grid)
-            # self.get_next_generation()
 
-        # Time  18.247326
-        print(datetime.now() - start)
         return grid
 
-    #
     def draw_grid(self):
         for cell in grid:
             if cell.val == 1:
@@ -135,6 +133,7 @@ class GameOfLife:
 
 if __name__ == '__main__':
     # 65
+    # 80
     seed_id = random.randint(1, 100)
     print(f"Seed: {seed_id}")
     random.seed(seed_id)
